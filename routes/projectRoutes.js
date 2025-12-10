@@ -1,18 +1,17 @@
 const express = require("express");
-const { authMiddleware } = require("../middlewares/auth");
+// const { authMiddleware } = require("../middlewares/auth"); // Temporarily disabled for Lab 2
 const Project = require("../models/Project");
 
 const projectRouter = express.Router();
 
-// Protect all routes
-projectRouter.use(authMiddleware);
+// projectRouter.use(authMiddleware); // Temporarily disabled for Lab 2
 
 /**
  * GET /api/projects
  */
 projectRouter.get("/", async (req, res) => {
   try {
-    const userProjects = await Project.find({ user: req.user._id });
+    const userProjects = await Project.find(); // No user filtering for Lab 2
     res.json(userProjects);
   } catch (error) {
     console.error(error);
@@ -32,11 +31,7 @@ projectRouter.get("/:projectId", async (req, res) => {
       return res.status(404).json({ message: `Project with id: ${projectId} not found!` });
     }
 
-    if (project.user.toString() !== req.user._id) {
-      return res.status(403).json({ message: "User is not authorized!" });
-    }
-
-    res.json(project);
+    res.json(project); // Skipping user ownership check
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
@@ -50,7 +45,7 @@ projectRouter.post("/", async (req, res) => {
   try {
     const newProject = await Project.create({
       ...req.body,
-      user: req.user._id,
+      // user: req.user._id, // Skipped for Lab 2
     });
 
     res.status(201).json(newProject);
@@ -70,10 +65,6 @@ projectRouter.put("/:projectId", async (req, res) => {
 
     if (!project) {
       return res.status(404).json({ message: "Project not found" });
-    }
-
-    if (project.user.toString() !== req.user._id) {
-      return res.status(403).json({ message: "User is not authorized!" });
     }
 
     project.name = req.body.name || project.name;
@@ -97,10 +88,6 @@ projectRouter.delete("/:projectId", async (req, res) => {
 
     if (!project) {
       return res.status(404).json({ message: "Project not found" });
-    }
-
-    if (project.user.toString() !== req.user._id) {
-      return res.status(403).json({ message: "User is not authorized!" });
     }
 
     await project.deleteOne();

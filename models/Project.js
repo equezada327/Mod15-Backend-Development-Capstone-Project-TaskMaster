@@ -4,7 +4,7 @@ const projectSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true,
+    required: false, // Temporarily optional for Lab 2
   },
   name: {
     type: String,
